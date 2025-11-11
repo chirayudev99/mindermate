@@ -86,9 +86,6 @@ const Dashboard: React.FC = () => {
     return tasks.filter((t) => t.type === selectedTab);
   }, [tasks, selectedTab]);
 
-console.log(selectedTab,"selectedTab");
-
-
   return (
     <div className="px-4 sm:px-8 py-6 mx-auto">
       {/* Header */}
