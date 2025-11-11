@@ -118,7 +118,6 @@ console.log(selectedTab,"selectedTab");
 
       {/* Tabs */}
       <div className="flex justify-end gap-3 mt-5">
-        {/* <TabSwitcher selectedTab={selectedTab} onSelectTab={setSelectedTab} /> */}
         {(["prior", "simple"] as TabType[]).map((type) => (
           <button
             key={type}
