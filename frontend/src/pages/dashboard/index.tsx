@@ -1,5 +1,5 @@
 // src/pages/dashboard/index.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 import { tasksAPI } from "@/api/config";
 import { useAuth } from "@/context/AuthContext";
@@ -7,6 +7,8 @@ import { FaCheck, FaPlus, FaBell } from "react-icons/fa";
 import AddTaskModal from "./AddTaskModal";
 import HorizontalCalendar from "@/components/HorizontalCalendar";
 import { notificationService } from "@/services/notificationService";
+import TaskProgress from "@/components/TaskProgress";
+import TabSwitcher from "@/components/Tab";
 
 interface Task {
   _id: string;
@@ -16,6 +18,7 @@ interface Task {
   reminderTime?: string;
   time?: string;
   completed?: boolean;
+  type?: "prior" | "simple";
 }
 
 const Dashboard: React.FC = () => {
@@ -24,6 +27,7 @@ const Dashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState<"prior" | "simple">("prior");
 
   const fetchTasks = async () => {
     if (!user) return;
@@ -33,7 +37,6 @@ const Dashboard: React.FC = () => {
         selectedDate.toISOString().split("T")[0]
       );
       setTasks(tasks);
-      // Schedule notifications after fetching tasks
       notificationService.scheduleNotifications(tasks);
     } catch (error: any) {
       toast.error(error.message || "Failed to fetch tasks. Please try again.");
@@ -47,20 +50,13 @@ const Dashboard: React.FC = () => {
     fetchTasks();
   }, [user, selectedDate]);
 
-  // Setup FCM notifications
   useEffect(() => {
     if (user) {
-      // Initialize FCM and register token
       const initFCM = async () => {
-        // Request notification permission first
         await notificationService.requestPermission();
-        // Initialize FCM
         await notificationService.initialize();
       };
-
       initFCM();
-
-      // Cleanup on unmount
       return () => {
         notificationService.cleanup();
       };
@@ -69,10 +65,7 @@ const Dashboard: React.FC = () => {
 
   const toggleTask = async (taskId: string, completed: boolean) => {
     try {
-      await tasksAPI.update(taskId, {
-        completed: !completed,
-      });
-      // Update local state instantly (optimistic UI)
+      await tasksAPI.update(taskId, { completed: !completed });
       setTasks((prev) =>
         prev.map((t) =>
           t._id === taskId ? { ...t, completed: !completed } : t
@@ -87,38 +80,64 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Filter tasks based on selected tab
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((t) => t.type === selectedTab);
+  }, [tasks, selectedTab]);
+
+console.log(selectedTab,"selectedTab");
+
+
   return (
-    <div className="m-8">
+    <div className="px-4 sm:px-8 py-6 mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-700 to-violet-500 rounded-3xl p-6 flex justify-between items-center shadow-lg">
+      <div className="bg-gradient-to-r from-violet-700 to-violet-500 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-lg">
         <div>
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl sm:text-2xl font-semibold text-white">
             Hi{" "}
             {user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "User"},
           </h2>
-          <p className="text-gray-100 text-lg">
+          <p className="text-gray-100 text-sm sm:text-base">
             Lost time is never found again
           </p>
         </div>
-        <div className="bg-white/20 rounded-full w-20 h-20 flex flex-col items-center justify-center border border-white/30 text-white">
-          <p className="text-lg font-medium">{tasks.length}</p>
-          <span className="text-xs tracking-wide">TODAY</span>
-        </div>
+        <TaskProgress
+          total={filteredTasks.length}
+          completed={filteredTasks.filter((t) => t.completed).length}
+        />
       </div>
 
       {/* Calendar */}
-      <div className="flex flex-col items-center mt-10">
+      <div className="flex flex-col items-center mt-8">
         <HorizontalCalendar
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
         />
       </div>
 
+      {/* Tabs */}
+      <div className="flex justify-end gap-3 mt-5">
+        {/* <TabSwitcher selectedTab={selectedTab} onSelectTab={setSelectedTab} /> */}
+        {["prior", "simple"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setSelectedTab(type)}
+            className={`px-4 py-2 rounded-lg font-medium text-sm cursor-pointer ${
+              selectedTab === type
+                ? "bg-violet-600 text-white"
+                : "bg-gray-800 text-gray-300"
+            }`}
+          >
+            {type === 'prior' ? "Prior-Task" : "Simple Task"}
+          </button>
+        ))}
+      </div>
+
       {/* Tasks */}
-      <div className="mt-10 space-y-4">
+      <div className="mt-8 space-y-4">
         {loading ? (
           <p className="text-center text-gray-400">Loading tasks...</p>
-        ) : tasks.length === 0 ? (
+        ) : filteredTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center mt-16">
             <h3 className="text-lg font-semibold text-gray-300 mb-2">
               No tasks available
@@ -128,21 +147,17 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
         ) : (
-          tasks.map((task) => (
+          filteredTasks.map((task) => (
             <div
               key={task._id}
-              className={`p-5 rounded-xl border flex justify-between items-start transition-all duration-200 ${
+              className={`p-4 sm:p-5 rounded-xl border flex flex-col sm:flex-row justify-between sm:items-start gap-3 transition-all duration-200 ${
                 task.completed
                   ? "border-green-400 bg-green-400/10"
                   : "border-white/20 bg-black/30"
               }`}
             >
               <div className="flex-1">
-                   {/* <p className="text-purple-400 font-semibold">
-                  {task.time || "No specific time"}
-                </p> */}
-                <div className="flex items-center gap-2">
-             
+                <div className="flex items-center gap-2 flex-wrap">
                   <p
                     className={`text-violet-400 font-semibold text-base ${
                       task.completed ? "line-through text-gray-500" : ""
@@ -173,10 +188,10 @@ const Dashboard: React.FC = () => {
 
               <button
                 onClick={() => toggleTask(task._id, task.completed || false)}
-                className={`w-6 h-6 border rounded-sm flex items-center justify-center transition-all ${
+                className={`w-7 h-7 sm:w-6 sm:h-6 cursor-pointer border rounded-md flex items-center justify-center transition-all ${
                   task.completed
                     ? "bg-green-500 border-green-500"
-                    : "border-white"
+                    : "border-white hover:border-violet-400"
                 }`}
               >
                 {task.completed && <FaCheck size={12} />}
@@ -189,7 +204,7 @@ const Dashboard: React.FC = () => {
       {/* Add Task Floating Button */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="fixed bottom-8 right-8 bg-violet-600 hover:bg-violet-700 transition rounded-full p-4 text-white shadow-lg"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-violet-600 hover:bg-violet-700 transition rounded-full p-4 text-white shadow-lg"
       >
         <FaPlus size={18} />
       </button>

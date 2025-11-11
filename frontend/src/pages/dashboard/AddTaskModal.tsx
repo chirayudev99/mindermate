@@ -21,7 +21,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
   onTaskAdded,
 }) => {
   const { user } = useAuth();
-  const [taskType, setTaskType] = useState("Prior-Task");
+  const [taskType, setTaskType] = useState("prior");
   const [title, setTitle] = useState("");
   const [taskText, setTaskText] = useState("");
   const [reminderTime, setReminderTime] = useState("");
@@ -64,7 +64,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
       <h2 className="text-xl font-semibold text-center mb-6">Quick Add Task</h2>
 
       <div className="flex justify-center gap-3 mb-5">
-        {["Prior-Task", "Simple Task"].map((type) => (
+        {["prior", "simple"].map((type) => (
           <button
             key={type}
             onClick={() => setTaskType(type)}
@@ -74,7 +74,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
                 : "bg-gray-800 text-gray-300"
             }`}
           >
-            {type}
+            {type === 'prior' ? "Prior-Task" : "Simple Task"}
           </button>
         ))}
       </div>

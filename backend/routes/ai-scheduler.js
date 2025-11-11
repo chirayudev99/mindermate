@@ -139,7 +139,7 @@ Parse these tasks: "${prompt}"`;
     }
 
     const createdTasks = [];
-    const taskType = defaultType || "Prior-Task";
+    const taskType = defaultType || "prior";
 
     for (const taskData of parsedTasks) {
       if (!taskData.title || !taskData.text) continue;
