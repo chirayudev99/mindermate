@@ -10,7 +10,7 @@ const taskSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["Prior-Task", "Simple Task"],
+      enum: ["prior", "simple"],
     },
     title: {
       type: String,

@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
         .json({ message: "Type, text, and date are required" });
     }
 
-    if (!["Prior-Task", "Simple Task"].includes(type)) {
+    if (!["prior", "simple"].includes(type)) {
       return res.status(400).json({ message: "Invalid task type" });
     }
 

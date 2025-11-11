@@ -133,7 +133,7 @@ export const tasksAPI = {
 
 // AI Scheduler API
 export const aiSchedulerAPI = {
-  parseAndCreate: async (prompt: string, date: string, defaultType: string = "Prior-Task") => {
+  parseAndCreate: async (prompt: string, date: string, defaultType: string = "prior") => {
     const response = await apiRequest("/ai-scheduler/parse", {
       method: "POST",
       body: JSON.stringify({ prompt, date, defaultType }),
