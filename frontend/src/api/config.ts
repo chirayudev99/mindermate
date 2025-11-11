@@ -22,13 +22,15 @@ const apiRequest = async (
   options: RequestInit = {}
 ): Promise<Response> => {
   const token = getToken();
-  const headers: HeadersInit = {
+
+  // Force headers to be a Record<string, string> — fully type-safe and mutable
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -45,6 +47,7 @@ const apiRequest = async (
 
   return response;
 };
+
 
 // Auth API
 export const authAPI = {

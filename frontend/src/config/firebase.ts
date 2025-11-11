@@ -1,6 +1,6 @@
 // Firebase Configuration
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, type Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -61,7 +61,7 @@ export const onMessageListener = () => {
   }
 
   return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
+    onMessage(messaging as Messaging, (payload) => {
       console.log("Message received in foreground:", payload);
       resolve(payload);
     });

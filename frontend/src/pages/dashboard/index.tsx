@@ -8,7 +8,6 @@ import AddTaskModal from "./AddTaskModal";
 import HorizontalCalendar from "@/components/HorizontalCalendar";
 import { notificationService } from "@/services/notificationService";
 import TaskProgress from "@/components/TaskProgress";
-import TabSwitcher from "@/components/Tab";
 
 interface Task {
   _id: string;
@@ -21,13 +20,15 @@ interface Task {
   type?: "prior" | "simple";
 }
 
+type TabType = "prior" | "simple";
+
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<"prior" | "simple">("prior");
+  const [selectedTab, setSelectedTab] = useState<TabType>("prior");
 
   const fetchTasks = async () => {
     if (!user) return;
@@ -118,7 +119,7 @@ console.log(selectedTab,"selectedTab");
       {/* Tabs */}
       <div className="flex justify-end gap-3 mt-5">
         {/* <TabSwitcher selectedTab={selectedTab} onSelectTab={setSelectedTab} /> */}
-        {["prior", "simple"].map((type) => (
+        {(["prior", "simple"] as TabType[]).map((type) => (
           <button
             key={type}
             onClick={() => setSelectedTab(type)}

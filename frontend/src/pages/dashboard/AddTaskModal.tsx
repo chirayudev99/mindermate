@@ -35,7 +35,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
     setLoading(true);
 
     try {
-      const newTask = await tasksAPI.create({
+      await tasksAPI.create({
         type: taskType,
         title,
         text: taskText,
