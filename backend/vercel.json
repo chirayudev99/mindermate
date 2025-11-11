@@ -5,7 +5,14 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "server.js" }
-  ]
+  ],
+    "crons": [
+      {
+        "path": "/cron/notification-cron",
+        "schedule": "*/1 * * * *"
+      }
+    ]
+  
 }
 
 

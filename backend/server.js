@@ -48,17 +48,17 @@ mongoose
       console.log(`Server is running on port ${PORT}`);
 
       // Schedule cron job to check for notifications every minute
-      cron.schedule("* * * * *", async () => {
-        try {
-          const result = await scheduleTaskNotifications();
-          if (result.sent > 0) {
-            console.log(`Sent ${result.sent} notification(s)`);
-          }
-        } catch (error) {
-          console.error("Error in notification cron job:", error);
-        }
-      });
-      console.log("Notification scheduler started (runs every minute)");
+      // cron.schedule("* * * * *", async () => {
+      //   try {
+      //     const result = await scheduleTaskNotifications();
+      //     if (result.sent > 0) {
+      //       console.log(`Sent ${result.sent} notification(s)`);
+      //     }
+      //   } catch (error) {
+      //     console.error("Error in notification cron job:", error);
+      //   }
+      // });
+      // console.log("Notification scheduler started (runs every minute)");
     });
   })
   .catch((error) => {
