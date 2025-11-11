@@ -8,13 +8,13 @@ importScripts(
 
 // Initialize Firebase in the service worker
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId:import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyD9Cpzb-BL90pKuWNjDbUK_BsstkBlXuw4",
+    authDomain: "mindermate.firebaseapp.com",
+    projectId: "mindermate",
+    storageBucket: "mindermate.firebasestorage.app",
+    messagingSenderId: "814324552593",
+    appId: "1:814324552593:web:71c1461f92f4a208b48030",
+    measurementId: "G-DBRGQR5TCF"
   };
 
 firebase.initializeApp(firebaseConfig);
