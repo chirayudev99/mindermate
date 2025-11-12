@@ -48,10 +48,10 @@ const router = express.Router();
 // Or if you prefer GET (simpler for testing in browser)
 router.get("/cron/check-notifications", async (req, res) => {
   try {
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // const cronSecret = process.env.CRON_SECRET;
+    // if (cronSecret) {
+    //   return res.status(401).json({ error: 'Unauthorized' });
+    // }
 
     console.log('🔔 Cron job triggered (GET):', new Date().toISOString());
     
