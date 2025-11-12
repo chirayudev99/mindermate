@@ -6,7 +6,7 @@ import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/tasks.js";
 import aiSchedulerRoutes from "./routes/ai-scheduler.js";
 import notificationRoutes from "./routes/notifications.js";
-import { initializeFirebase } from "./services/fcmService.js";
+import { initializeFirebase, messaging } from "./services/fcmService.js";
 import cron from "node-cron";
 import { scheduleTaskNotifications } from "./services/fcmService.js";
 
@@ -33,36 +33,53 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/ai-scheduler", aiSchedulerRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", message: "Server is running" });
+// Health check route (root)
+app.get("/", async (req, res) => {
+  const mongoStatus =
+    mongoose.connection.readyState === 1
+      ? "connected"
+      : mongoose.connection.readyState === 2
+      ? "connecting"
+      : "disconnected";
+
+  const firebaseStatus = messaging ? "initialized" : "not initialized";
+
+  res.status(200).json({
+    status: "ok",
+    message: "Mindermate backend is running",
+    services: {
+      mongodb: mongoStatus,
+      firebase: firebaseStatus,
+    },
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/mindermate")
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
 
-      // Schedule cron job to check for notifications every minute
+      // Uncomment when running outside Vercel (Render/Heroku etc.)
       // cron.schedule("* * * * *", async () => {
       //   try {
       //     const result = await scheduleTaskNotifications();
       //     if (result.sent > 0) {
-      //       console.log(`Sent ${result.sent} notification(s)`);
+      //       console.log(`🔔 Sent ${result.sent} notification(s)`);
       //     }
       //   } catch (error) {
-      //     console.error("Error in notification cron job:", error);
+      //     console.error("❌ Error in notification cron job:", error);
       //   }
       // });
-      // console.log("Notification scheduler started (runs every minute)");
+      // console.log("⏰ Notification scheduler active (runs every minute)");
     });
   })
   .catch((error) => {
-    console.error("MongoDB connection error:", error);
+    console.error("❌ MongoDB connection error:", error);
     process.exit(1);
   });
 

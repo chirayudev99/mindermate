@@ -4,11 +4,80 @@ import User from "../models/User.js";
 import {
   sendTaskReminder,
   scheduleTaskNotifications,
+  initializeFirebase,
 } from "../services/fcmService.js";
 
 const router = express.Router();
 
-// All notification routes require authentication
+// ===== PUBLIC CRON ENDPOINT (No Authentication) =====
+// This endpoint will be called by cron-job.org every minute
+router.post("/cron/check-notifications", async (req, res) => {
+  try {
+    // Optional: Add secret key for security
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && req.headers['x-cron-secret'] !== cronSecret) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🔔 Cron job triggered:', new Date().toISOString());
+    
+    // Initialize Firebase if not already done
+    initializeFirebase();
+    
+    // Run the notification scheduler
+    const result = await scheduleTaskNotifications();
+    
+    console.log(`✅ Checked ${result.checked} tasks, sent ${result.sent} notifications`);
+    
+    res.json({ 
+      success: true,
+      timestamp: new Date().toISOString(),
+      checked: result.checked,
+      sent: result.sent,
+      message: `Checked ${result.checked} tasks, sent ${result.sent} notifications`
+    });
+  } catch (error) {
+    console.error('❌ Error in cron job:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
+// Or if you prefer GET (simpler for testing in browser)
+router.get("/cron/check-notifications", async (req, res) => {
+  try {
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && req.query.secret !== cronSecret) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🔔 Cron job triggered (GET):', new Date().toISOString());
+    
+    initializeFirebase();
+    const result = await scheduleTaskNotifications();
+    
+    console.log(`✅ Checked ${result.checked} tasks, sent ${result.sent} notifications`);
+    
+    res.json({ 
+      success: true,
+      timestamp: new Date().toISOString(),
+      checked: result.checked,
+      sent: result.sent,
+      message: `Checked ${result.checked} tasks, sent ${result.sent} notifications`
+    });
+  } catch (error) {
+    console.error('❌ Error in cron job:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
+// ===== AUTHENTICATED ROUTES BELOW =====
+// All other notification routes require authentication
 router.use(authenticate);
 
 // Register FCM token
