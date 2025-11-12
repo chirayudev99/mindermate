@@ -6,7 +6,7 @@ import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/tasks.js";
 import aiSchedulerRoutes from "./routes/ai-scheduler.js";
 import notificationRoutes from "./routes/notifications.js";
-import { initializeFirebase, messaging } from "./services/fcmService.js";
+import { initializeFirebase } from "./services/fcmService.js";
 import cron from "node-cron";
 import { scheduleTaskNotifications } from "./services/fcmService.js";
 
@@ -32,28 +32,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/ai-scheduler", aiSchedulerRoutes);
 app.use("/api/notifications", notificationRoutes);
-
-// Health check route (root)
-app.get("/", async (req, res) => {
-  const mongoStatus =
-    mongoose.connection.readyState === 1
-      ? "connected"
-      : mongoose.connection.readyState === 2
-      ? "connecting"
-      : "disconnected";
-
-  const firebaseStatus = messaging ? "initialized" : "not initialized";
-
-  res.status(200).json({
-    status: "ok",
-    message: "Mindermate backend is running",
-    services: {
-      mongodb: mongoStatus,
-      firebase: firebaseStatus,
-    },
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // Connect to MongoDB
 mongoose
