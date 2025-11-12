@@ -20,16 +20,16 @@ const router = express.Router();
 //     }
 
 //     console.log('🔔 Cron job triggered:', new Date().toISOString());
-    
+
 //     // Initialize Firebase if not already done
 //     initializeFirebase();
-    
+
 //     // Run the notification scheduler
 //     const result = await scheduleTaskNotifications();
-    
+
 //     console.log(`✅ Checked ${result.checked} tasks, sent ${result.sent} notifications`);
-    
-//     res.json({ 
+
+//     res.json({
 //       success: true,
 //       timestamp: new Date().toISOString(),
 //       checked: result.checked,
@@ -38,9 +38,9 @@ const router = express.Router();
 //     });
 //   } catch (error) {
 //     console.error('❌ Error in cron job:', error);
-//     res.status(500).json({ 
+//     res.status(500).json({
 //       success: false,
-//       error: error.message 
+//       error: error.message
 //     });
 //   }
 // });
@@ -48,30 +48,36 @@ const router = express.Router();
 // Or if you prefer GET (simpler for testing in browser)
 router.get("/cron/check-notifications", async (req, res) => {
   try {
+    // Optional: Add secret key for security
     // const cronSecret = process.env.CRON_SECRET;
-    // if (cronSecret) {
+    // if (cronSecret && req.headers['x-cron-secret'] !== cronSecret) {
     //   return res.status(401).json({ error: 'Unauthorized' });
     // }
 
-    console.log('🔔 Cron job triggered (GET):', new Date().toISOString());
-    
+    console.log("🔔 Cron job triggered (GET):", new Date().toISOString());
+
     initializeFirebase();
     const result = await scheduleTaskNotifications();
-    
-    console.log(`✅ Checked ${result.checked} tasks, sent ${result.sent} notifications`);
-    
-    res.json({ 
+
+    console.log(
+      `✅ Checked ${result.checked} tasks, sent ${result.sent} notifications`
+    );
+
+    res.json({
       success: true,
       timestamp: new Date().toISOString(),
       checked: result.checked,
-      sent: result.sent,
-      message: `Checked ${result.checked} tasks, sent ${result.sent} notifications`
+      sent: result.sent || 0,
+      failed: result.failed || 0,
+      skipped: result.skipped || 0,
+      details: result.details || {},
+      message: `Checked ${result.checked} tasks, sent ${result.sent || 0} notifications, ${result.failed || 0} failed, ${result.skipped || 0} skipped`,
     });
   } catch (error) {
-    console.error('❌ Error in cron job:', error);
-    res.status(500).json({ 
+    console.error("❌ Error in cron job:", error);
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message,
     });
   }
 });
